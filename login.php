@@ -19,11 +19,7 @@ session_start();
 // В суперглобальном массиве $_SESSION хранятся переменные сессии.
 // Будем сохранять туда логин после успешной авторизации.
 if (!empty($_SESSION['login'])) {
-  // Если есть логин в сессии, то пользователь уже авторизован.
-  // TODO: Сделать выход (окончание сессии вызовом session_destroy()
-  //при нажатии на кнопку Выход).
-  // Делаем перенаправление на форму.
-  header('Location: ./');
+    header('Location: index.php');
 }
 
 // В суперглобальном массиве $_SERVER PHP сохраняет некторые заголовки запроса HTTP
@@ -31,7 +27,7 @@ if (!empty($_SESSION['login'])) {
 if ($_SERVER['REQUEST_METHOD'] == 'GET') {
 ?>
 
-<form action="" method="post">
+<form action="login.php" method="post">
   <input name="login" />
   <input name="password" type ="password"/>
   <input type="submit" value="Войти" />
@@ -54,10 +50,10 @@ else {
             $check->bindParam(1,$login);
             $check->execute();
             $username=$check->fetchALL();
-           echo '<pre>';
-            print_r($username);
-            var_dump($username);
-            echo '</pre>';
+      //     echo '<pre>';
+      //      print_r($username);
+    //        var_dump($username);
+     //       echo '</pre>';
             if(password_verify($pswrd,$username[0][2])){
                 $uid=$username[0]['id'];
                 $error=FALSE;
@@ -69,17 +65,16 @@ else {
         }
     }
     if($error==TRUE){
-        print(password_hash($pswrd,PASSWORD_DEFAULT));
         print('Неправильные логин или пароль <br> Создайте нового <a href="index.php">пользователя</a> или <a href="login.php">попробуйте войти снова</a> ');
         session_destroy();
         exit();
     }
 
   // Если все ок, то авторизуем пользователя.
-  $_SESSION['login'] = $_POST['login'];
+  $_SESSION['login'] = $login;
   // Записываем ID пользователя.
   $_SESSION['uid'] = $uid;
 
   // Делаем перенаправление.
-  header('Location: ./');
+  header('Location: index.php');
 }
