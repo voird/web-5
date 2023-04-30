@@ -4,6 +4,7 @@
  * сессии для изменения отправленных данных в предыдущей задаче,
  * пароль и логин генерируются автоматически при первоначальной отправке формы.
  */
+session_start();
 
 // Отправляем браузеру правильную кодировку,
 // файл index.php должен быть в кодировке UTF-8 без BOM.
@@ -32,6 +33,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
                 strip_tags($_COOKIE['login']),
                 strip_tags($_COOKIE['pass']));
         }
+        setcookie('fio_error', '', 100000);
+        setcookie('email_error', '', 100000);
+        setcookie('year_error', '', 100000);
+        setcookie('gender_error', '',100000);
+        setcookie('limbs_error', '',100000);
+        setcookie('superpower_error', '', 100000);
+        setcookie('text_error', '', 100000);
+        setcookie('check_error', '', 100000);
     }
     
     // Складываем признак ошибок в массив.
@@ -115,8 +124,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     
     // Если нет предыдущих ошибок ввода, есть кука сессии, начали сессию и
     // ранее в сессию записан факт успешного логина.
-    if (empty($errors) && !empty($_COOKIE[session_name()]) &&
-        session_start() && !empty($_SESSION['login'])) {
+    if (empty($errors) && !empty($_COOKIE[session_name()]) && !empty($_SESSION['login'])) {
             $user = 'u52813';
             $pass = '3993374';
             $db = new PDO('mysql:host=localhost;dbname=u52813', $user, $pass, array(PDO::ATTR_PERSISTENT => true));
@@ -150,23 +158,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
                         $values['superpower'] == 'p';
                     }
                 }
-                printf('Произведен вход с логином %s, uid %d', $_SESSION['login'], $_SESSION['uid']);
             }
             catch(PDOException $e){
                 print('Error: '.$e->getMessage());
                 exit();
             }
+            printf('Произведен вход с логином %s, uid %d', $_SESSION['login'], $_SESSION['uid']);
         }
- 
         include('form.php');
 }
 else {
-    if(!empty($_POST['logout'])){
+    if(isset($_POST['logout'])){
         session_destroy();
         header('Location: index.php');
     }
 // Иначе, если запрос был методом POST, т.е. нужно проверить данные и сохранить их в XML-файл.
-else {
     // Проверяем ошибки.
     $errors = FALSE;
     if (empty($_POST['fio'])) {
@@ -227,20 +233,21 @@ else {
         setcookie('limbs_value', $_POST['limbs'], time() + 30 * 24 * 60 * 60);
         //checked( 'limbs_value', $_POST['limbs'], 'limbs_value' );
     }
-    if(!isset($_POST['check'])){
-        setcookie('check_error','1',time()+  24 * 60 * 60);
-        setcookie('check_value', '', 100000);
-        $errors=TRUE;
-    }
-    else{
-        setcookie('check_value', TRUE,time()+ 12 * 30 * 24 * 60 * 60);
-        setcookie('check_error','',100000);
+    if(empty($_SESSION['login'])){
+        if(!isset($check)){
+            setcookie('check_error','1',time()+ 24*60*60);
+            setcookie('check_value', '', 100000);
+            $errors=TRUE;
+        }
+        else{
+            setcookie('check_value',TRUE,time()+ 60*60);
+            setcookie('check_error','',100000);
+        }
     }
     
     if ($errors) {
         // При наличии ошибок перезагружаем страницу и завершаем работу скрипта.
-        header('Location: index.php');
-        exit();
+        header('Location: login.php');
     }
     else {
         // Удаляем Cookies с признаками ошибок.
@@ -254,8 +261,7 @@ else {
         setcookie('check_error', '', 100000);
     }
     // Проверяем меняются ли ранее сохраненные данные или отправляются новые.
-    if (!empty($_COOKIE[session_name()]) &&
-        session_start() && !empty($_SESSION['login'])) {
+    if (!empty($_COOKIE[session_name()]) && !empty($_SESSION['login'])) {
             $user = 'u52813';
             $pass = '9339974';
             $db = new PDO('mysql:host=localhost;dbname=u52813', $user, $pass, [PDO::ATTR_PERSISTENT => true]);
@@ -362,5 +368,4 @@ else {
         
         // Делаем перенаправление.
         header('Location: ./');
-}
 }
