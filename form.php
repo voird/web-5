@@ -18,7 +18,6 @@ if (!empty($messages)) {
   }
   print('</div>');
 }
-
 // Далее выводим форму отмечая элементы с ошибками классом error
 // и задавая начальные значения элементов ранее сохраненными.
 
@@ -83,10 +82,24 @@ if (!empty($messages)) {
 <p>
   <input type="submit" value="ok" />
 </p>
-<p> <a href="login.php">Если имеется аккаунт, то нажмите здесь</a></p>
- <form action="index.php" method="post">
+
+<?php
+            if(empty($_SESSION['login'])){
+            echo'
+            <div class="login">
+                <p> <a href="login.php">Если имеется аккаунт, то нажмите здесь</a></p>
+            </div>';
+            }
+            else{
+                echo '
+            <div class ="logout">
+                <form action="index.php" method="post">
                     <input name="logout" type="submit" value="Выйти">
                 </form>
+                </div>';
+                
+            } ?>
+
     </form>
   </body>
 </html>
